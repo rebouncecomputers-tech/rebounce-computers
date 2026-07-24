@@ -8,8 +8,6 @@ generator client {
 
 datasource db {
   provider = "mysql"
-    url      = env("DATABASE_URL")
-       
 }
 
 // ---------- USERS & AUTH ----------
@@ -327,4 +325,14 @@ model Review {
   createdAt          DateTime @default(now())
 
   @@index([productId])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int
+  authorName String
+  comment    String
+  createdAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
 }

@@ -10,55 +10,57 @@ const trustMarkers = [
 
 export default function Hero() {
   return (
-    <section className="bg-harbor text-white">
-      <div className="max-w-7xl mx-auto px-4 py-14 grid lg:grid-cols-2 gap-10 items-center">
-        <div>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold leading-tight">
-            Genuine tech,
-            <br />
-            <span className="text-coral">honest prices.</span>
-          </h1>
-          <p className="mt-4 text-white/70 text-lg max-w-md">
-            Laptops, desktops, printers and accessories — new and verified
-            refurbished — delivered across Mombasa and Kenya.
-          </p>
-          <div className="mt-8 flex gap-3">
-            <Link
-              href="/catalogue/laptops"
-              className="bg-coral hover:bg-coral-dark transition-colors px-6 py-3 rounded-md font-semibold"
-            >
-              Shop Laptops
-            </Link>
-            <Link
-              href="/deals/hot-deals"
-              className="border border-white/30 hover:border-white transition-colors px-6 py-3 rounded-md font-semibold"
-            >
-              View Hot Deals
-            </Link>
-          </div>
-        </div>
-
-        {/* Tilted product card stack */}
-        <div className="hidden lg:flex justify-center items-center relative h-72">
-          <div className="absolute w-56 h-56 bg-white/10 rounded-xl -rotate-6 translate-x-16" />
-          <div className="absolute w-56 h-56 bg-white/20 rounded-xl rotate-3 -translate-x-10" />
-          <div className="relative w-56 h-56 bg-white rounded-xl shadow-xl flex items-center justify-center">
-            <span className="font-mono text-harbor text-sm">Featured stock →</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Status board ticker */}
-      <div className="border-t border-white/10 bg-harbor-dark">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap gap-x-8 gap-y-2 justify-between font-mono text-xs text-white/70">
-          {trustMarkers.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex items-center gap-2">
-              <Icon size={14} className="text-coral" />
-              {label}
+    <div className="px-4 py-8">
+      <section className="max-w-7xl mx-auto bg-harbor text-white rounded-2xl overflow-hidden">
+        <div className="px-6 sm:px-10 py-14 grid lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <h1 className="font-display text-4xl sm:text-5xl font-semibold leading-tight text-white">
+              Genuine tech,
+              <br />
+              <span className="text-coral">honest prices.</span>
+            </h1>
+            <p className="mt-4 text-white text-base sm:text-lg font-medium leading-relaxed max-w-md">
+              Laptops, desktops, printers and accessories — new and verified
+              refurbished — delivered across Mombasa and Kenya.
+            </p>
+            <div className="mt-8 flex gap-3">
+              <Link
+                href="/catalogue/laptops"
+                className="bg-coral hover:bg-coral-dark transition-colors px-6 py-3 rounded-md font-semibold text-base text-white"
+              >
+                Shop Laptops
+              </Link>
+              <Link
+                href="/deals/hot-deals"
+                className="border border-white/60 hover:border-white transition-colors px-6 py-3 rounded-md font-semibold text-base text-white"
+              >
+                View Hot Deals
+              </Link>
             </div>
-          ))}
+          </div>
+
+          {/* Tilted product card stack */}
+          <div className="hidden lg:flex justify-center items-center relative h-72">
+            <div className="absolute w-56 h-56 bg-white/10 rounded-xl -rotate-6 translate-x-16" />
+            <div className="absolute w-56 h-56 bg-white/20 rounded-xl rotate-3 -translate-x-10" />
+            <div className="relative w-56 h-56 bg-white rounded-xl shadow-xl flex items-center justify-center">
+              <span className="font-semibold text-harbor text-base">Featured stock →</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
+
+        {/* Status board ticker */}
+        <div className="border-t border-white/20 bg-harbor-dark">
+          <div className="px-6 sm:px-10 py-3 flex flex-wrap gap-x-8 gap-y-2 justify-between text-sm font-semibold text-white">
+            {trustMarkers.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2">
+                <Icon size={14} className="text-coral" />
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }

@@ -12,7 +12,7 @@ export default function CategoryStrip({ categories }: { categories: Category[] }
   return (
     <section className="bg-white border-b border-line">
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex gap-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-22 overflow-x-auto scrollbar-hide">
           {categories.map((category) => (
             <Link
               key={category.id}
@@ -30,7 +30,7 @@ export default function CategoryStrip({ categories }: { categories: Category[] }
                   />
                 )}
               </div>
-              <span className="text-[11px] leading-tight text-center text-ink/70 group-hover:text-harbor transition-colors">
+              <span className="text-[12px] leading-tight text-center text-ink/90 group-hover:text-harbor transition-colors">
                 {category.name}
               </span>
             </Link>
@@ -39,4 +39,4 @@ export default function CategoryStrip({ categories }: { categories: Category[] }
       </div>
     </section>
   );
-}
+}   

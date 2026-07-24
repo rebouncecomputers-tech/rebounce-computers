@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Poppins, Inter, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const displayFont = Space_Grotesk({
+const displayFont = Poppins({
   subsets: ["latin"],
   variable: "--font-display-family",
-  weight: ["500", "700"],
+  weight: ["400", "500"],
 });
 
 const bodyFont = Inter({

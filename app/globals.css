@@ -7,16 +7,29 @@
   --color-coral: #E8342E;
   --color-coral-dark: #C4221D;
   --color-gold: #C9A227;
-  --color-ink: #1A1A1A;
+  --color-ink: #0a0a0a;
   --color-sand: #F4F4F5;
   --color-line: #E5E5E5;
 
-  --font-display: var(--font-display-family), system-ui, sans-serif;
-  --font-sans: var(--font-body-family), system-ui, sans-serif;
+  --font-display: var(--font-display-family), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: var(--font-body-family),ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-mono: var(--font-data-family), monospace;
 }
 
 body {
   background-color: var(--color-sand);
   color: var(--color-ink);
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 22s linear infinite;
 }
