@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import WishlistButton from "./wishlistButton";
 
 type ProductCardProduct = {
   slug: string;
@@ -31,6 +32,7 @@ export default function ProductCard({ product }: { product: ProductCardProduct }
       className="group flex flex-col rounded-lg border border-line bg-white overflow-hidden hover:shadow-md transition-shadow"
     >
       <div className="relative aspect-square bg-sand overflow-hidden">
+          <WishlistButton productId={product.id} />
         {primaryImage && (
           <Image
             src={primaryImage.url}

@@ -1,12 +1,42 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingCart, Heart, Menu, User } from "lucide-react";
-import { getNavCategoriesWithBrands } from "@/lib/queries";
+import { Search, Menu, User } from "lucide-react";
+import { getNavCategoriesWithBrands, getCartForUser, getWishlistForUser } from "@/lib/queries";
+import { getCurrentUser } from "@/lib/customerAuth";
 import TopBar from "./topBar";
 import CategoryNav from "./categoryNav";
+import AccountDropdown from "./accountDropdown";
+import CartPreview from "./cartPreview";
+import WishlistPreview from "./wishlistPreview";
 
 export default async function Header() {
-  const navCategories = await getNavCategoriesWithBrands();
+  const [navCategories, user] = await Promise.all([
+    getNavCategoriesWithBrands(),
+    getCurrentUser(),
+  ]);
+
+  const [cart, wishlistRaw] = user
+    ? await Promise.all([getCartForUser(user.id), getWishlistForUser(user.id)])
+    : [null, []];
+
+  const wishlist = wishlistRaw.map((item) => ({
+    ...item,
+    product: {
+      ...item.product,
+      basePrice: Number(item.product.basePrice),
+    },
+  }));
+
+  const cartItems = (cart?.items ?? []).map((item) => ({
+    ...item,
+    product: {
+      ...item.product,
+      basePrice: Number(item.product.basePrice),
+    },
+    variant: item.variant
+      ? { ...item.variant, priceDelta: Number(item.variant.priceDelta) }
+      : null,
+  }));
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-line">
@@ -31,19 +61,19 @@ export default async function Header() {
         </div>
 
         <div className="flex items-center gap-5 shrink-0">
-          <Link
-            href="/account/login"
-            className="hidden sm:flex items-center gap-1.5 text-sm text-ink hover:text-harbor transition-colors"
-          >
-            <User size={20} />
-            <span>Login / Register</span>
-          </Link>
-          <Link href="/wishlist" aria-label="Wishlist">
-            <Heart size={22} className="text-ink hover:text-coral transition-colors" />
-          </Link>
-          <Link href="/cart" aria-label="Cart" className="relative">
-            <ShoppingCart size={22} className="text-ink hover:text-coral transition-colors" />
-          </Link>
+          {user ? (
+            <AccountDropdown firstName={user.firstName ?? "there"} />
+          ) : (
+            <Link
+              href="/account/login"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-ink hover:text-harbor transition-colors"
+            >
+              <User size={20} />
+              <span>Login / Register</span>
+            </Link>
+          )}
+          <WishlistPreview items={wishlist} />
+          <CartPreview items={cartItems} />
         </div>
       </div>
 

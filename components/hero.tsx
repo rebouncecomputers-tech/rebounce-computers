@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Truck, ShieldCheck, Smartphone, BadgeCheck } from "lucide-react";
+import FeaturedCardStack from "./featuredCardStack";
 
 const trustMarkers = [
   { icon: ShieldCheck, label: "Genuine warranty on all products" },
@@ -39,17 +40,9 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* Tilted product card stack */}
-          <div className="hidden lg:flex justify-center items-center relative h-72">
-            <div className="absolute w-56 h-56 bg-white/10 rounded-xl -rotate-6 translate-x-16" />
-            <div className="absolute w-56 h-56 bg-white/20 rounded-xl rotate-3 -translate-x-10" />
-            <div className="relative w-56 h-56 bg-white rounded-xl shadow-xl flex items-center justify-center">
-              <span className="font-semibold text-harbor text-base">Featured stock →</span>
-            </div>
-          </div>
+          <FeaturedCardStack />
         </div>
 
-        {/* Status board ticker */}
         <div className="border-t border-white/20 bg-harbor-dark">
           <div className="px-6 sm:px-10 py-3 flex flex-wrap gap-x-8 gap-y-2 justify-between text-sm font-semibold text-white">
             {trustMarkers.map(({ icon: Icon, label }) => (

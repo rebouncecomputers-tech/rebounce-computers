@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { usePathname } from "next/navigation";
 import { formatKes } from "@/lib/format";
+import { addToCart } from "@/app/cart/actions";
 
 type Variant = {
   id: string;
@@ -20,18 +22,21 @@ export default function ProductActions({
   basePrice: unknown;
   variants: Variant[];
 }) {
+  const pathname = usePathname();
   const defaultVariant = variants.find((v) => v.isDefault) ?? variants[0] ?? null;
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(defaultVariant);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const finalPrice = Number(basePrice) + Number(selectedVariant?.priceDelta ?? 0);
 
   function handleAddToCart() {
-    // Cart persistence is wired up in the upcoming Cart & Checkout step —
-    // for now this just confirms the interaction visually.
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2000);
+    startTransition(async () => {
+      await addToCart(productId, selectedVariant?.id ?? null, quantity, pathname);
+      setJustAdded(true);
+      setTimeout(() => setJustAdded(false), 2000);
+    });
   }
 
   return (
@@ -83,9 +88,10 @@ export default function ProductActions({
 
       <button
         onClick={handleAddToCart}
-        className="bg-coral hover:bg-coral-dark transition-colors text-white font-semibold py-3 rounded-md"
+        disabled={isPending}
+        className="bg-coral hover:bg-coral-dark transition-colors text-white font-semibold py-3 rounded-md disabled:opacity-60"
       >
-        {justAdded ? "✓ Added to cart" : "Add to Cart"}
+        {isPending ? "Adding..." : justAdded ? "✓ Added to cart" : "Add to Cart"}
       </button>
     </div>
   );

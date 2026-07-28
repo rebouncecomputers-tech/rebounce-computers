@@ -1,4 +1,6 @@
 import { prisma } from "./prisma";
+import { unstable_cache } from "next/cache";
+
 
 export async function getHomepageData() {
   const [categories, hotDeals, featuredProducts, brands] = await Promise.all([
@@ -165,5 +167,31 @@ export async function getNavCategoriesWithBrands() {
       brands: Array.from(brandMap.values()).slice(0, 8),
       products: productLinks.slice(0, 6),
     };
+  });
+}
+
+export async function getCartForUser(userId: string) {
+  const cart = await prisma.cart.findUnique({
+    where: { userId },
+    include: {
+      items: {
+        include: {
+          product: { include: { images: true } },
+          variant: true,
+        },
+        orderBy: { id: "asc" },
+      },
+    },
+  });
+  return cart;
+}
+
+export async function getWishlistForUser(userId: string) {
+  return prisma.wishlistItem.findMany({
+    where: { userId },
+    include: {
+      product: { include: { images: true } },
+    },
+    orderBy: { addedAt: "desc" },
   });
 }

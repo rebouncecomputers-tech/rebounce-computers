@@ -11,4 +11,4 @@ export default async function NewProductPage() {
       <ProductForm categories={categories} brands={brands} action={createProduct} />
     </div>
   );
-}
+}  
