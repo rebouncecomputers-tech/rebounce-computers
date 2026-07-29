@@ -6,69 +6,80 @@ import { formatKes } from "@/lib/format";
 export default async function AdminDashboard() {
   const products = await getAllProductsForAdmin();
 
+  const totalStock = products.reduce((sum, p) => {
+    const variantStock = p.variants?.reduce((s, v) => s + v.stockQty, 0) ?? 0;
+    return sum + variantStock;
+  }, 0);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-bold text-ink">Products ({products.length})</h1>
+        <div>
+          <h1 className="font-display font-semibold text-2xl uppercase text-ink">
+            Products
+          </h1>
+          <p className="text-sm text-ink/50 mt-1">
+            {products.length} products · {totalStock} units in stock
+          </p>
+        </div>
         <Link
           href="/admin/products/new"
-          className="bg-coral hover:bg-coral-dark transition-colors text-white text-sm font-semibold px-4 py-2 rounded-md"
+          className="bg-coral hover:bg-coral-dark transition-colors text-white text-sm font-display font-semibold uppercase px-5 py-2.5 rounded-full"
         >
           + Add Product
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg border border-line overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-sand border-b border-line">
-            <tr className="text-left text-ink/60">
-              <th className="px-4 py-3 font-medium">Image</th>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Category</th>
-              <th className="px-4 py-3 font-medium">Price</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product) => (
-              <tr key={product.id} className="border-b border-line last:border-0">
-                <td className="px-4 py-2">
-                  {product.images[0] && (
-                    <div className="relative w-10 h-10 rounded overflow-hidden bg-sand">
-                      <Image
-                        src={product.images[0].url}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
-                </td>
-                <td className="px-4 py-2 font-medium text-ink">{product.name}</td>
-                <td className="px-4 py-2 text-ink/60">{product.category.name}</td>
-                <td className="px-4 py-2 font-mono">{formatKes(product.basePrice)}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`text-xs px-2 py-1 rounded font-mono ${
-                      product.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {product.isActive ? "Active" : "Hidden"}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {products.map((product) => {
+          const stock = product.variants?.reduce((s, v) => s + v.stockQty, 0) ?? 0;
+          return (
+            <Link
+              key={product.id}
+              href={`/admin/products/${product.id}/edit`}
+              className="group flex flex-col bg-white border border-line rounded-lg overflow-hidden hover:border-harbor hover:shadow-md transition-all"
+            >
+              <div className="relative aspect-square bg-sand">
+                {product.images[0] && (
+                  <Image
+                    src={product.images[0].url}
+                    alt={product.name}
+                    fill
+                    sizes="200px"
+                    className="object-cover group-hover:scale-105 transition-transform"
+                  />
+                )}
+                <span
+                  className={`absolute top-1.5 left-1.5 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded ${
+                    product.isActive ? "bg-green-600 text-white" : "bg-ink/60 text-white"
+                  }`}
+                >
+                  {product.isActive ? "Live" : "Hidden"}
+                </span>
+              </div>
+
+              <div className="p-2.5 flex flex-col gap-1 flex-1">
+                <p className="text-[10px] font-mono uppercase text-ink/40">
+                  {product.category.name}
+                </p>
+                <p className="text-xs font-medium text-ink line-clamp-2 leading-snug">
+                  {product.name}
+                </p>
+                <p className="text-[11px] text-ink/50 line-clamp-2 leading-snug">
+                  {product.shortDescription}
+                </p>
+                <div className="mt-auto pt-1.5 flex items-center justify-between">
+                  <span className="font-mono text-xs font-semibold text-harbor">
+                    {formatKes(product.basePrice)}
                   </span>
-                </td>
-                <td className="px-4 py-2 text-right">
-                  <Link
-                    href={`/admin/products/${product.id}/edit`}
-                    className="text-harbor hover:underline"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  <span className="text-[10px] font-mono text-ink/40">
+                    {stock} left
+                  </span>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

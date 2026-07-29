@@ -1,55 +1,72 @@
 import { prisma } from "./prisma";
 import { unstable_cache } from "next/cache";
 
-
-export async function getHomepageData() {
-  const [categories, hotDeals, featuredProducts, brands] = await Promise.all([
-    prisma.category.findMany({
-      where: { parentId: null, isActive: true },
-      orderBy: { displayOrder: "asc" },
-    }),
-    prisma.deal.findUnique({
-      where: { slug: "hot-deals" },
-      include: {
-        products: {
-          include: {
-            product: {
-              include: { images: true, brand: true },
+export const getHomepageData = unstable_cache(
+  async () => {
+    const [categories, hotDeals, featuredProducts, brands] = await Promise.all([
+      prisma.category.findMany({
+        where: { parentId: null, isActive: true },
+        orderBy: { displayOrder: "asc" },
+      }),
+      prisma.deal.findUnique({
+        where: { slug: "hot-deals" },
+        include: {
+          products: {
+            include: {
+              product: { include: { images: true, brand: true, variants: true  } },
             },
           },
         },
-      },
-    }),
-    prisma.product.findMany({
-      where: { isFeatured: true, isActive: true },
-      include: { images: true, brand: true },
-      take: 8,
-    }),
-    prisma.brand.findMany(),
-  ]);
-
-  const topCategories = categories.slice(0, 4);
-
-  const categoryRows = await Promise.all(
-    topCategories.map(async (category) => {
-      const children = await prisma.category.findMany({
-        where: { parentId: category.id },
-        select: { id: true },
-      });
-      const categoryIds = [category.id, ...children.map((c) => c.id)];
-
-      const products = await prisma.product.findMany({
-        where: { categoryId: { in: categoryIds }, isActive: true },
-        include: { images: true, brand: true },
+      }),
+      prisma.product.findMany({
+        where: { isFeatured: true, isActive: true },
+        include: { images: true, brand: true, variants: true  },
         take: 8,
-      });
+      }),
+      prisma.brand.findMany(),
+    ]);
 
+    const topCategories = categories.slice(0, 4);
+    const topCategoryIds = topCategories.map((c) => c.id);
+
+    // One query for all children across all top categories, instead of one per category
+    const allChildren = await prisma.category.findMany({
+      where: { parentId: { in: topCategoryIds } },
+      select: { id: true, parentId: true },
+    });
+
+    const childrenByParent = new Map<string, string[]>();
+    for (const child of allChildren) {
+      const list = childrenByParent.get(child.parentId!) ?? [];
+      list.push(child.id);
+      childrenByParent.set(child.parentId!, list);
+    }
+
+    // One query for all products across every top category + its children combined
+    const allCategoryIds = [
+      ...topCategoryIds,
+      ...allChildren.map((c) => c.id),
+    ];
+
+    const allProducts = await prisma.product.findMany({
+      where: { categoryId: { in: allCategoryIds }, isActive: true },
+      include: { images: true, brand: true, variants: true  },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const categoryRows = topCategories.map((category) => {
+      const relevantIds = [category.id, ...(childrenByParent.get(category.id) ?? [])];
+      const products = allProducts
+        .filter((p) => relevantIds.includes(p.categoryId))
+        .slice(0, 8);
       return { category, products };
-    })
-  );
+    });
 
-  return { categories, hotDeals, featuredProducts, brands, categoryRows };
-}
+    return { categories, hotDeals, featuredProducts, brands, categoryRows };
+  },
+  ["homepage-data"],
+  { revalidate: 60 }
+);
 
 export async function getDealBySlug(slug: string) {
   return prisma.deal.findUnique({
@@ -57,9 +74,7 @@ export async function getDealBySlug(slug: string) {
     include: {
       products: {
         include: {
-          product: {
-            include: { images: true, brand: true },
-          },
+          product: { include: { images: true, brand: true , variants: true  } },
         },
       },
     },
@@ -78,7 +93,7 @@ export async function getCategoryWithProducts(slug: string) {
 
   const products = await prisma.product.findMany({
     where: { categoryId: { in: categoryIds }, isActive: true },
-    include: { images: true, brand: true },
+    include: { images: true, brand: true , variants: true  },
     orderBy: { createdAt: "desc" },
   });
 
@@ -106,7 +121,7 @@ export async function getProductBySlug(slug: string) {
       isActive: true,
       id: { not: product.id },
     },
-    include: { images: true, brand: true },
+    include: { images: true, brand: true, variants: true  },
     take: 6,
   });
 
@@ -135,40 +150,45 @@ export async function getProductForEdit(id: string) {
   });
 }
 
-export async function getNavCategoriesWithBrands() {
-  const categories = await prisma.category.findMany({
-    where: { parentId: null, isActive: true },
-    orderBy: { displayOrder: "asc" },
-    include: {
-      products: {
-        where: { isActive: true },
-        include: { brand: true },
+export const getNavCategoriesWithBrands = unstable_cache(
+  async () => {
+    const categories = await prisma.category.findMany({
+      where: { parentId: null, isActive: true },
+      orderBy: { displayOrder: "asc" },
+      include: {
+        products: {
+          where: { isActive: true },
+          include: { brand: true },
+          take: 20,
+        },
       },
-    },
-  });
+    });
 
-  return categories.map((category) => {
-    const brandMap = new Map<string, { name: string; slug: string }>();
-    const productLinks: { name: string; slug: string }[] = [];
+    return categories.map((category) => {
+      const brandMap = new Map<string, { name: string; slug: string }>();
+      const productLinks: { name: string; slug: string }[] = [];
 
-    for (const product of category.products) {
-      if (product.brand) {
-        brandMap.set(product.brand.slug, {
-          name: product.brand.name,
-          slug: product.brand.slug,
-        });
+      for (const product of category.products) {
+        if (product.brand) {
+          brandMap.set(product.brand.slug, {
+            name: product.brand.name,
+            slug: product.brand.slug,
+          });
+        }
+        productLinks.push({ name: product.name, slug: product.slug });
       }
-      productLinks.push({ name: product.name, slug: product.slug });
-    }
 
-    return {
-      name: category.name,
-      slug: category.slug,
-      brands: Array.from(brandMap.values()).slice(0, 8),
-      products: productLinks.slice(0, 6),
-    };
-  });
-}
+      return {
+        name: category.name,
+        slug: category.slug,
+        brands: Array.from(brandMap.values()).slice(0, 8),
+        products: productLinks.slice(0, 6),
+      };
+    });
+  },
+  ["nav-categories"],
+  { revalidate: 300 }
+);
 
 export async function getCartForUser(userId: string) {
   const cart = await prisma.cart.findUnique({
@@ -195,3 +215,4 @@ export async function getWishlistForUser(userId: string) {
     orderBy: { addedAt: "desc" },
   });
 }
+

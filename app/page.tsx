@@ -21,7 +21,7 @@ export default async function HomePage() {
 
       <section className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="font-display text-2xl font-bold text-ink mb-6">Featured Products</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {featuredProducts.map((product) => (
             <ProductCard key={product.slug} product={product} />
           ))}

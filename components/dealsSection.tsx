@@ -33,7 +33,7 @@ export default function DealsSection({ deal }: { deal: Deal }) {
             </Link>
           </div>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {deal.products.map(({ product }) => (
             <ProductCard key={product.slug} product={product} />
           ))}

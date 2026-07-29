@@ -20,12 +20,15 @@ export default async function Header() {
     : [null, []];
 
   const wishlist = wishlistRaw.map((item) => ({
-    ...item,
-    product: {
-      ...item.product,
-      basePrice: Number(item.product.basePrice),
-    },
-  }));
+  ...item,
+  product: {
+    ...item.product,
+    basePrice: Number(item.product.basePrice),
+    compareAtPrice: item.product.compareAtPrice
+      ? Number(item.product.compareAtPrice)
+      : null,
+  },
+}));
 
   const cartItems = (cart?.items ?? []).map((item) => ({
     ...item,
