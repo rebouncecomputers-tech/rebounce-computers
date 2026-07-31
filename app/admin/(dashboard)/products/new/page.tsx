@@ -7,8 +7,10 @@ export default async function NewProductPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-ink mb-6">Add New Product</h1>
+      <h1 className="font-display font-semibold text-2xl uppercase text-ink mb-6">
+        Add New Product
+      </h1>
       <ProductForm categories={categories} brands={brands} action={createProduct} />
     </div>
   );
-}  
+}

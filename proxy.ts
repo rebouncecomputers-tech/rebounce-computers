@@ -27,7 +27,7 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  const customerProtectedPaths = ["/cart", "/wishlist", "/account"];
+  const customerProtectedPaths = ["/cart", "/wishlist", "/account",  "/checkout"];
   const isCustomerProtected =
     customerProtectedPaths.some((p) => pathname.startsWith(p)) &&
     pathname !== "/account/login" &&
@@ -46,5 +46,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/cart/:path*", "/wishlist/:path*", "/account/:path*"],
+  matcher: ["/admin/:path*", "/cart/:path*", "/wishlist/:path*", "/account/:path*", "/checkout/:path*"],
 };

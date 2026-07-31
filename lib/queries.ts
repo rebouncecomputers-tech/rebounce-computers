@@ -110,6 +110,20 @@ export async function getProductBySlug(slug: string) {
       brand: true,
       category: true,
       reviews: { orderBy: { createdAt: "desc" } },
+      // Soonest-ending active deal for this product, if any.
+      // product.deals is DealProduct[] (the join row), so the actual
+      // Deal is one level deeper via .deal — see page.tsx usage.
+      deals: {
+        where: {
+          deal: {
+            isActive: true,
+            endsAt: { gt: new Date() },
+          },
+        },
+        include: { deal: true },
+        orderBy: { deal: { endsAt: "asc" } },
+        take: 1,
+      },
     },
   });
 
@@ -216,3 +230,77 @@ export async function getWishlistForUser(userId: string) {
   });
 }
 
+export async function getAllCategoriesForAdmin() {
+  const categories = await prisma.category.findMany({
+    orderBy: [{ parentId: "asc" }, { displayOrder: "asc" }],
+    include: {
+      parent: { select: { name: true } },
+      _count: { select: { products: true } },
+    },
+  });
+  return categories;
+}
+
+export async function getCategoryForEdit(id: string) {
+  return prisma.category.findUnique({ where: { id } });
+}
+
+export async function getAllCustomers() {
+  return prisma.user.findMany({
+    where: { role: "CUSTOMER" },
+    orderBy: { createdAt: "desc" },
+    include: {
+      _count: { select: { orders: true } },
+    },
+  });
+}
+
+function generateOrderNumber() {
+  const year = new Date().getFullYear();
+  const random = Math.floor(10000 + Math.random() * 90000);
+  return `RBC-${year}-${random}`;
+}
+
+export { generateOrderNumber };
+
+export async function getOrderById(id: string) {
+  return prisma.order.findUnique({
+    where: { id },
+    include: {
+      address: true,
+      items: {
+        include: {
+          product: { include: { images: true } },
+          variant: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getOrdersForUser(userId: string) {
+  return prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: { include: { product: { include: { images: true } } } },
+    },
+  });
+}
+
+export async function getOrdersForAdmin() {
+  return prisma.order.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      user: true,
+      items: { include: { product: true } },
+    },
+  });
+}
+
+export async function getAddressesForUser(userId: string) {
+  return prisma.address.findMany({
+    where: { userId },
+    orderBy: { isDefault: "desc" },
+  });
+}
